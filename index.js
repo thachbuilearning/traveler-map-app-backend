@@ -93,7 +93,7 @@ app.get(
     }),
     (req, res) => {
         // Pass the username to the frontend as a query parameter
-        res.redirect(`http://127.0.0.1:5500/frontend/index.html?username=${req.user.username}`);
+        res.redirect(`https://traveler-map-app-test.netlify.app?username=${req.user.username}`);
     }
 );
 
