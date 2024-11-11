@@ -87,7 +87,7 @@ app.get('/auth/google',
 );
 
 app.get(
-    "/auth/google/callback",
+    "https://traveler-map-app-backend.onrender.com/auth/google/callback",
     passport.authenticate("google", {
         failureRedirect: "/login",
     }),
