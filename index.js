@@ -23,6 +23,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(cors({
+    origin: 'https://traveler-map-app-test.netlify.app',
+    credentials: true,
+}));
+
 // Define serializeUser and deserializeUser functions
 passport.serializeUser((user, done) => {
     done(null, user._id);
@@ -50,7 +55,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: "/auth/google/callback",
+            callbackURL: "https://traveler-map-app-backend.onrender.com/auth/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
@@ -87,7 +92,7 @@ app.get('/auth/google',
 );
 
 app.get(
-    "https://traveler-map-app-backend.onrender.com/auth/google/callback",
+    "/auth/google/callback",
     passport.authenticate("google", {
         failureRedirect: "/login",
     }),
