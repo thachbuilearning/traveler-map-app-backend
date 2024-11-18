@@ -43,32 +43,29 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
     try {
-        // Find the user by username
         const user = await User.findOne({ username: req.body.username });
-
         if (!user) {
             return res.status(400).json("Wrong username");
         }
 
-        // Validate the password
-        const validPassword = await bcrypt.compare(
-            req.body.password,
-            user.password
-        );
-
+        const validPassword = await bcrypt.compare(req.body.password, user.password);
         if (!validPassword) {
             return res.status(400).json("Wrong password");
         }
 
-        // Respond with the user's ID and username
-        res.status(200).json({ _id: user._id, username: user.username });
+        // Save user session
+        req.login(user, (err) => {
+            if (err) return next(err);
+            res.status(200).json({ _id: user._id, username: user.username });
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json("Internal Server Error");
     }
 });
+
 
 // Check current user session status
 router.get('/auth/status', (req, res) => {

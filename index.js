@@ -7,7 +7,6 @@ const pinRoute = require("./routes/pins");
 const cors = require('cors');
 const passport = require("passport");
 const User = require("./models/User");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const session = require("express-session");
 
 dotenv.config();
@@ -49,58 +48,31 @@ mongoose
         console.log(err)
     });
 
-// Google Authentication Strategy
-passport.use(
-    new GoogleStrategy(
-        {
-            clientID: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: "https://traveler-map-app-backend.onrender.com/auth/google/callback",
-        },
-        async (accessToken, refreshToken, profile, done) => {
-            try {
-                console.log("Google OAuth callback received");
-                let user = await User.findOne({ googleId: profile.id });
 
-                if (!user) {
-                    console.log("User not found, creating a new user");
-                    user = new User({
-                        googleId: profile.id,
-                        username: profile.displayName,
-                        email: profile.emails[0].value,
-                        profilePicture: profile.photos[0].value,
-                    });
-                    await user.save();
-                }
-
-                console.log("Google OAuth callback successful, user:", user);
-                return done(null, user);
-            } catch (err) {
-                console.error("Error in Google OAuth callback:", err);
-                return done(err);
-            }
-        }
-    )
-);
 
 app.use("/api/users", userRoute);
 app.use("/api/pins", pinRoute);
 
-// Route for Google authentication
-app.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+// Endpoint to save user data
+app.post("/api/users", async (req, res) => {
+    const { username, email, profilePicture } = req.body;
 
-app.get(
-    "/auth/google/callback",
-    passport.authenticate("google", {
-        failureRedirect: "/login",
-    }),
-    (req, res) => {
-        // Pass the username to the frontend as a query parameter
-        res.redirect(`https://traveler-map-app-test.netlify.app?username=${req.user.username}`);
+    try {
+        let user = await User.findOne({ email });
+        if (!user) {
+            // Create a new user if not already in database
+            user = new User({ username, email, profilePicture });
+            await user.save();
+            console.log("New user created:", user);
+        } else {
+            console.log("User already exists:", user);
+        }
+        res.status(200).json(user);
+    } catch (err) {
+        console.error("Error saving user data:", err);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-);
+});
 
 app.listen(8800, () => {
     console.log("Backend server is running on 8800 port!")
