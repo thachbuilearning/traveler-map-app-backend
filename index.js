@@ -27,13 +27,11 @@ app.use(cors({
     credentials: true,
 }));
 
-// app.use((req, res, next) => {
-//     res.setHeader("Access-Control-Allow-Origin", "https://traveler-map-app-test.netlify.app");
-//     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//     res.setHeader("Access-Control-Allow-Credentials", "true");
-//     next();
-// });
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    next();
+});
 
 
 // Define serializeUser and deserializeUser functions
